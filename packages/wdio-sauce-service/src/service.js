@@ -41,7 +41,6 @@ export default class SauceService {
     before() {
         this.isUP = isUnifiedPlatform(global.browser.capabilities)
     }
-
     beforeSuite (suite) {
         this.suiteTitle = suite.title
         if (this.options.setJobNameInBeforeSuite && !this.isUP) {
@@ -80,16 +79,17 @@ export default class SauceService {
         )
         global.browser.execute('sauce:context=' + fullTitle)
     }
-
     afterSuite (suite) {
         if (Object.prototype.hasOwnProperty.call(suite, 'error')) {
             ++this.failures
+            console.log('afterSuite()=', this.failures, suite)
         }
     }
 
     afterTest (test, context, results) {
         if (!results.passed) {
             ++this.failures
+            console.log('afterTest()=', this.failures)
         }
     }
 
@@ -131,7 +131,7 @@ export default class SauceService {
     /**
      * update Sauce Labs job
      */
-    after (result) {
+    after (numberOfFailures) {
         if (!this.isServiceEnabled && !this.isRDC) {
             return
         }
@@ -142,11 +142,14 @@ export default class SauceService {
          * set failures if user has bail option set in which case afterTest and
          * afterSuite aren't executed before after hook
          */
-        if (global.browser.config.mochaOpts && global.browser.config.mochaOpts.bail && Boolean(result)) {
+        let mochaOpts = global.browser.config.mochaOpts
+        if (mochaOpts && mochaOpts.bail && numberOfFailures) {
             failures = 1
         }
 
         const status = 'status: ' + (failures > 0 ? 'failing' : 'passing')
+        console.log('after()=', failures)
+
         if (!global.browser.isMultiremote) {
             log.info(`Update job with sessionId ${global.browser.sessionId}, ${status}`)
             return this.isUP ? this.updateUP(failures) : this.updateJob(global.browser.sessionId, failures)
@@ -164,16 +167,20 @@ export default class SauceService {
         }
 
         const status = 'status: ' + (this.failures > 0 ? 'failing' : 'passing')
+        const currentFailureCount = this.failures
+        this.failures = 0
+        console.log('onReload()=', this.failures)
 
         if (!global.browser.isMultiremote) {
             log.info(`Update (reloaded) job with sessionId ${oldSessionId}, ${status}`)
-            return this.updateJob(oldSessionId, this.failures, true)
+            return this.updateJob(oldSessionId, currentFailureCount, true)
         }
 
         const browserName = global.browser.instances.filter(
             (browserName) => global.browser[browserName].sessionId === newSessionId)[0]
         log.info(`Update (reloaded) multiremote job for browser "${browserName}" and sessionId ${oldSessionId}, ${status}`)
-        return this.updateJob(oldSessionId, this.failures, true, browserName)
+
+        return this.updateJob(oldSessionId, currentFailureCount, true, browserName)
     }
 
     async updateJob (sessionId, failures, calledOnReload = false, browserName) {

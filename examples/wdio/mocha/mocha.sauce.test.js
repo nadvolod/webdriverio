@@ -1,15 +1,17 @@
-let fails = 0
+// Bug: Sauce Service doesn't update all jobs as failed
+// - The last should pass, but running the first one in a separate describe block causes an
+// issue where the 2nd one fails incorrectly
+
+// Bug 2: Sauce Service names all jobs with the first describe name
+
+// Bug 3: Spec Reporter just prints out one Sauce Labs job link
 
 describe('Test 1', () => {
     it('should fail', () => {
-        fails++
-        console.log('should fail=' + fails)
-        expect(false).toBe(true)
+        browser.url('https://webdriver.io/')
+        expect(browser.getTitle()).toContain('Selenium')
     })
     //afterTest()
-    after(function () {
-        fails = 0
-    })
 })
 //afterSuite()
 
@@ -25,14 +27,15 @@ describe('Test 1', () => {
 
 //beforeSuite()
 describe('Test 2', () => {
+    before(() => {
+        browser.reloadSession() // create a new session in sauce labs to have separate videos for each describe block
+    })
+
     it('should pass', () => {
-        console.log('should pass=' + fails)
-        expect(true).toBe(true)
+        browser.url('https://webdriver.io/')
+        expect(browser.getTitle()).toContain('WebdriverIO')
     })
     //afterTest()
-    after(function () {
-        console.log('after()=' + fails)
-    })
 })
 //afterSuite()
 

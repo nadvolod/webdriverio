@@ -14,7 +14,7 @@ exports.config = {
      * specify test files
      */
     specs: [
-        path.resolve(__dirname, 'mocha.test.js')
+        path.resolve(__dirname, 'mocha.sauce.test.js')
     ],
 
     /**
