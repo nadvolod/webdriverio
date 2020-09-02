@@ -131,7 +131,7 @@ export default class SauceService {
     /**
      * update Sauce Labs job
      */
-    after (result) {
+    after (numberOfFailures) {
         if (!this.isServiceEnabled && !this.isRDC) {
             return
         }
@@ -142,7 +142,8 @@ export default class SauceService {
          * set failures if user has bail option set in which case afterTest and
          * afterSuite aren't executed before after hook
          */
-        if (global.browser.config.mochaOpts && global.browser.config.mochaOpts.bail && Boolean(result)) {
+        let mochaOpts = global.browser.config.mochaOpts
+        if (mochaOpts && mochaOpts.bail && numberOfFailures) {
             failures = 1
         }
 
