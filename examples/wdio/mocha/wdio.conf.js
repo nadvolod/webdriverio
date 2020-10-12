@@ -35,6 +35,7 @@ exports.config = {
         ui: 'bdd',
         timeout: 5000
     },
+    services: ['chromedriver'],
 
     /**
      * hooks

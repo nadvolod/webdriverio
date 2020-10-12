@@ -6,5 +6,9 @@
     "test:multiremote": "../../packages/wdio-cli/bin/wdio.js ./multiremote/wdio.conf.js",
     "test:customReporter": "../../packages/wdio-cli/bin/wdio.js ./custom-reporter/wdio.conf.js",
     "test:customService": "../../packages/wdio-cli/bin/wdio.js ./custom-service/wdio.conf.js"
+  },
+  "devDependencies": {
+    "@wdio/cli": "^6.6.3",
+    "wdio-chromedriver-service": "^6.0.4"
   }
 }
